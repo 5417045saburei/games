@@ -41,5 +41,5 @@ void setup() {
 void draw() {
   background(0);
   p1.display();
-  
+  //p1.judge();
 }
