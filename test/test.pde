@@ -1,4 +1,40 @@
+class player{
+  int px, py;
+  int hp;
+  
+  void display() {
+    px = mouseX;
+    py = mouseY;
+    
+    stroke(255, 0, 0);
+    fill(0);
+    rect(px-15, py-15, 30, 30);
+    line(px, py-15, px-15, py+15);
+    line(px, py-15, px+15, py+15);
+    line(px, py+15, px-15, py-15);
+    line(px, py+15, px+15, py-15);
+  }
+  
+  /*
+  void judge() {
+    if(bullet.x > x-30 && bullet.x < x + 30 ||
+       bullet.y > y-30 && bullet.y < y + 30) {
+      hp--;
+    }
+  }
+  */
+  
+  void hp(int hp0) {
+    hp = hp0;
+  }
+  
+}
+
+
+
 class Items{
+  int p_x;
+  int p_y;
   float[] x = new float[10];
   float[] y = new float[10];
   float[] xSpeed = new float[10];
@@ -9,6 +45,11 @@ class Items{
   int[] bullet_ver = {1, 0, 0};
   int score = 0;
   int power = 0;
+  
+  void setItem(int x0, int y0){
+    p_x = x0;
+    p_y = y0;
+  }
 
   void makeItems(){
     size(600, 800);
@@ -34,9 +75,6 @@ class Items{
   }
 
   void drawItem(){
-    background(255);
-    fill(0);
-    ellipse(mouseX, mouseY, 30, 30);
     textSize(10);
     text("score:" + score, 300, 20);
     for(int i = 0; i < 10; i++){
@@ -64,7 +102,7 @@ class Items{
         }
         ySpeed[i] += 0.05;
       
-        if(dist(mouseX, mouseY, x[i] + 5.0, y[i] + 5.0) <= 30){
+        if((p_x <= x[i] + 20.0 && x[i] <= p_x + 40.0) && (p_y <= y[i] + 20.0 && y[i] <= p_y + 40.0)){
           if(items[i] == 3){ 
             bullet_ver[0] = 1;
             bullet_ver[1] = 0;
@@ -92,14 +130,21 @@ class Items{
   }
 }
 
-Items item = new Items();
+Items item;
+player p1;
 
 void setup() {
   size(600,800);
+  p1 = new player();
+  item = new Items();
+  p1.hp(20);
   item.makeItems();
 }
 
 void draw() {
   background(255);
+  p1.display();
+  item.setItem(p1.px, p1.py);
+  //p1.judge();
   item.drawItem();
 }
