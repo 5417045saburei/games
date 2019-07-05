@@ -1,4 +1,4 @@
-class item{
+class Items{
   float[] x = new float[10];
   float[] y = new float[10];
   float[] xSpeed = new float[10];
@@ -92,10 +92,14 @@ class item{
   }
 }
 
+Items item = new Items();
+
 void setup() {
   size(600,800);
+  item.makeItems();
 }
 
 void draw() {
   background(255);
+  item.drawItem();
 }
