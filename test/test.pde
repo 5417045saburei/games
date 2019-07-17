@@ -15,14 +15,28 @@ class player{
     line(px, py+15, px+15, py-15);
   }
   
-  /*
-  void judge() {
-    if(bullet.x > x-30 && bullet.x < x + 30 ||
-       bullet.y > y-30 && bullet.y < y + 30) {
-      hp--;
+  int avo = 0; //一つの弾で多段攻撃を回避
+  boolean judge(float bulletX[][], float bulletY[][]) {
+    int size = 10; //弾の大きさ
+    int i, j;
+    for(i = 0; i < bulletX.length; i++) {
+      for(j = 0; j < bulletX[i].length; j++) {
+        if((px <= bulletX[i][j] + size && bulletX[i][j]-size <= px) && (py <= bulletY[i][j] + size && bulletY[i][j]-size <= py)) {
+          if(avo+60 > timer) {//2秒間無敵
+            //ダメージを受けない
+          } else {
+            hp--;
+            avo = timer;
+          }
+        }
+      }
+    }
+    if(hp == 0) {
+      return false;
+    } else {
+      return true;
     }
   }
-  */
   
   void hp(int hp0) {
     hp = hp0;
@@ -168,39 +182,249 @@ class bullet {
     ballx[clickCount] = mouseX;
     bally[clickCount] = mouseY;
     clickCount += 1;
-    println(clickCount);
   }
   
-  void enemyBullet() {
+  
+  int BulletTotal = 10;
+  int enemyCount = 10;
+  float[][] eBulletX = new float [enemyCount][BulletTotal];
+  float[][] eBulletY = new float [enemyCount][BulletTotal];
+  float[][] BulletSpeadX = new float [enemyCount][BulletTotal];
+  float[][] BulletSpeadY = new float [enemyCount][BulletTotal];
+  int[][] rand = new int [enemyCount][BulletTotal];
+  int[][] Bulletjudge = new int [enemyCount][BulletTotal];
+  int[] Btimer = new int[enemyCount];
+  
+  void enemyBulletSet() {  
+    int i, j;
     
+    for(i = 0; i < enemyCount; i++) {
+      for(j = 0; j < BulletTotal; j++) {
+        rand[i][j] = int(random(1, 5)) * 30;
+      }
+    }
+    
+    for(i = 0; i < enemyCount; i++) {
+      for(j = 0; j < BulletTotal; j++) {
+        BulletSpeadX[i][j] = random(-5, 5);
+        BulletSpeadY[i][j] = random(0, 4);
+      }
+    }
+  }
+    
+  void enemyBullet(int eX[], int eY[]){
+    int i,j;
+    
+    for(i = 0; i < enemyCount; i++) {
+      Btimer[i] += 1;
+    }
+    
+    for(i = 0; i < enemyCount; i++) {
+      for(j = 0; j < BulletTotal; j++) {
+        if(j != 0 && Bulletjudge[i][j-1] != 1) {//処理を軽くするため
+          break;
+        }
+        
+        if(Btimer[i] > rand[i][j] && Bulletjudge[i][j] == 0) {
+          eBulletX[i][j] = eX[i];
+          eBulletY[i][j] = eY[i];
+          Bulletjudge[i][j] = 1;
+          Btimer[i] = 0;
+          break;
+        }
+        
+      }
+    }
+    
+    for(i = 0; i < enemyCount; i++) {
+      for(j = 0; j < BulletTotal; j++) {
+        if(Bulletjudge[i][j] == 1) {
+          eBulletX[i][j] += BulletSpeadX[i][j];
+          eBulletY[i][j] += BulletSpeadY[i][j];
+          
+          if(eBulletX[i][j]+size > width || eBulletX[i][j]-size < 0) {
+            BulletSpeadX[i][j] *= -1;
+          }
+          if(eBulletY[i][j]+size > height || eBulletY[i][j]-size < 0) {
+            BulletSpeadY[i][j] *= -1;
+          }
+          
+          fill(125);
+          ellipse(eBulletX[i][j], eBulletY[i][j], size, size);
+        }
+      }
+    }
+  }
+  
+  void delete() {
+    int i, j;
+    for(i = 0; i < enemyCount; i++) {
+      for(j = 0; j < BulletTotal; j++) {
+        eBulletX[i][j] = -5;
+        eBulletY[i][j] = -5;
+      }
+    }
+    
+    for(i = 0; i < ballx.length; i++) {
+      ballx[i] = -5;
+      bally[i] = -5;
+    }
   }
 }
 
+class Enemy {
+  int ballCount = 10;
+  int[] zakoX = new int[ballCount];
+  int[] zakoY = new int[ballCount];
+  int zakoR = 30;
+  int[] stepX = new int[ballCount];
+  int[] stepY = new int[ballCount];
+  int bossX = 200;
+  int bossY = 20;
+  int bossR = 160;
+  int bossStepX = 4;
+  int bossStepY = 1;
+  int[] easyEnemyHp = new int[ballCount];
+  
+  void setEnemy() {
+    for(int i = 0; i < ballCount; i++) {
+      zakoX[i] = int(random(10, 380));
+      zakoY[i] = int(random(15, 31));
+      stepX[i] = int(random(-5, 5));
+      stepY[i] = int(random(1, 3));
+    }
+    
+    for(int i = 0; i < ballCount; i++) {
+      easyEnemyHp[i] = 5;
+    }
+  }
+    
+  
+  void easyEnemy() {
+    for(int i = 0; i < zakoX.length; i++) {
+      if(zakoX[i] < zakoR/2 || zakoX[i] > width - zakoR/2) {
+        stepX[i] *= -1;
+      }
+      zakoX[i] += stepX[i];
+      zakoY[i] += stepY[i];
+      fill(0);
+      noStroke();
+      triangle(zakoX[i], zakoY[i], zakoX[i] - zakoR/2, zakoY[i] - zakoR, zakoX[i] - zakoR/2, zakoY[i]);
+      triangle(zakoX[i], zakoY[i], zakoX[i] + zakoR/2, zakoY[i] - zakoR, zakoX[i] + zakoR/2, zakoY[i]);
+      fill(255, 10, 10);
+      noStroke();
+      ellipse(zakoX[i], zakoY[i], zakoR, zakoR);
+    }
+  }
+  
+  void enemyDamege(float bX[], float bY[]) {
+    int i, j;
+    for(i = 0; i < ballCount; i++) {
+      for(j = 0; j < bX.length; j++) {
+        if((zakoX[i] <= bX[j] + 10 && bX[j] - 10 <= zakoX[i]) && (zakoY[i] <= bY[j] + 10 && bY[j]-10 <= zakoY[i])) {
+          easyEnemyHp[i]--;
+          bX[j] = -5;
+          bY[j] = -5;
+        }
+      }
+    }
+    
+    for(i = 0; i < ballCount; i++) {
+      if(easyEnemyHp[i] < 0) {
+        zakoX[i] = -5;
+        zakoY[i] = -5;
+      }
+    }
+  }
+  
+  void bigEnemy() {
+    if(bossX < bossR/2 || bossX > width - bossR/2) {
+      bossStepX *= -1;
+    }
+    if(bossY < -150 || bossY > height + 150) {
+      bossStepY *= -1;
+    }
+    bossX += bossStepX;
+    bossY += bossStepY;
+    fill(192);
+    noStroke();
+    ellipse(bossX, bossY, bossR, bossR);
+    stroke(255, 10, 10);
+    line(bossX - 10, bossY, bossX - 50, bossY - 40);
+    line(bossX + 10, bossY, bossX + 50, bossY - 40);
+    line(bossX, bossY + 10, bossX - 40, bossY + 50);
+    line(bossX, bossY + 10, bossX + 40, bossY + 50);
+  }
+  
+  boolean easyEnemyIn() { //画面内に全てのザコ敵がいるかどうか
+    int i, count = 0;
+    for(i = 0; i < ballCount; i++) {
+      if(zakoY[i] > height + zakoR + zakoR/2) {
+        count++;
+      }
+    }
+    if(count == 10) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
 
 Items item;
 player p1;
 bullet b;
+Enemy e;
+
+int timer = 0;
 
 void setup() {
   size(600,800);
+  noStroke();
+  frameRate(30);
+  
   p1 = new player();
   item = new Items();
   b = new bullet();
-  p1.hp(20);
+  e = new Enemy();  
+  
+  p1.hp(5);
   item.makeItems();
   b.MyMachineStart();
+  b.enemyBulletSet();
+  e.setEnemy();
 }
 
 void draw() {
-  background(255);
-  p1.display();
-  item.setItem(p1.px, p1.py);
-  //p1.judge();
-  item.drawItem();
-  b.MyMachineBullet();
+  if(timer > 3*30) { //3秒後スタート
+    background(255);
+    p1.display();
+    item.setItem(p1.px, p1.py);
+    if(p1.judge(b.eBulletX, b.eBulletY) == false){ //当たったらhp減少 falseでゲームオーバー
+      background(255);
+      return;
+    }
+    item.drawItem();
+    b.MyMachineBullet();
+    if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
+      e.easyEnemy();
+    }
+    e.enemyDamege(b.ballx, b.bally);
+    b.enemyBullet(e.zakoX,e.zakoY);
+    
+    if(timer > 30*30) {
+      e.bigEnemy();
+    }
+  }
+  timer++;
 }
 
 void mousePressed() {
   b.ClickBullet();
-  
+}
+
+void keyPressed() {
+  if(key == 'b' || key == 'B') {
+    b.delete();
+  }
 }
