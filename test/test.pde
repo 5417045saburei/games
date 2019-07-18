@@ -337,16 +337,17 @@ class bullet {
   void bigEnemySet() {
     int i;
     float stepX,stepY;
-    rd = int(random(0, 2));
+    rd = int(random(0, 3));
     if(rd == 0) {
       stepX = 0.5;
       stepY = 2;
       for(i = 0; i < BBX.length; i++) {
-        BBT[i] = 10;
         BSX[i] = stepX;
         BSY[i] = stepY;
+        BBT[i] = 5;
         if(stepX > 10) {
           stepX *= -1;
+          BBT[i] = 45;
         }
         stepX += 1;
         BJ[i] = 0;
@@ -355,10 +356,10 @@ class bullet {
       }
     } else if(rd == 1){
       stepX = 0;
-      stepY = 2;
+      stepY = 3;
       for(i = 0; i < BBX.length; i++) {
         if(i % 5 == 0) {
-          BBT[i] = 90;
+          BBT[i] = 45;
         }
         BSX[i] = stepX;
         BSY[i] = stepY;
@@ -371,6 +372,49 @@ class bullet {
         BBX[i] = -30;
         BBY[i] = -30;
       }
+    } else {
+      for(i = 0; i < BBX.length; i++) {
+        if(i % 8 == 0) {
+          BBT[i] = 45;
+        }
+        switch(i % 8) {
+          case 0:
+            BSX[i] = 0;
+            BSY[i] = 3.5;
+            break;
+          case 1:
+            BSX[i] = 2.5;
+            BSY[i] = 3.5;
+            break;
+          case 2:
+            BSX[i] = 3.5;
+            BSY[i] = 0;
+            break;
+          case 3:
+            BSX[i] = 3.5;
+            BSY[i] = -2.5;
+            break;
+          case 4:
+            BSX[i] = 0;
+            BSY[i] = -3.5;
+            break;
+          case 5:
+            BSX[i] = -2.5;
+            BSY[i] = -3.5;
+            break;
+          case 6:
+            BSX[i] = -3.5;
+            BSY[i] = 0;
+            break;
+          default:
+            BSX[i] = -2.5;
+            BSY[i] = 3.5;
+            break;
+        }
+        BJ[i] = 0;
+        BBX[i] = -30;
+        BBY[i] = -30;
+      }
     }
   }
   
@@ -378,15 +422,30 @@ class bullet {
     int i;
    
     BBTR++;
-    BJ[0] = 1;
-    for(i = 1; i < BBX.length; i++) {
-      if(BJ[i] == 0 && BBT[i] <= BBTR && BJ[i-1] == 1) {
-        BBX[i] = boX;
-        BBY[i] = boY;
-        BJ[i] = 1;
-        BBTR = 0;
+    
+    if(rd == 3) {
+      BJ[7] = 1;
+      for(i = 8; i < BBX.length; i++) {
+        if(BJ[i] == 0 && BBT[i] <= BBTR && BJ[i-1] == 1) {
+          BBX[i] = boX;
+          BBY[i] = boY;
+          BJ[i] = 1;
+          BBTR = 0;
+        }
+      }
+    } else {
+      BJ[0] = 1;
+      for(i = 0; i < BBX.length; i++) {
+        if(BJ[i] == 0 && BBT[i] <= BBTR && BJ[i-1] == 1) {
+          BBX[i] = boX;
+          BBY[i] = boY;
+          BJ[i] = 1;
+          BBTR = 0;
+        }
       }
     }
+    
+    
     
     for(i = 0; i < BBX.length; i++) {
       if(BJ[i] == 1) {
@@ -438,13 +497,14 @@ class Enemy {
   float bossX;
   float bossY;
   int bossR = 160;
-  float bossStepX = 2;
-  float bossStepY = 1;
+  float bossStepX = 2.5;
+  float bossStepY = 1.5;
   int[] easyEnemyHp = new int[ballCount];
   int bigEnemyHp;
   int[] k;
   float[] dpX;//deathPositionX
   float[] dpY;
+  int rd;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
@@ -457,13 +517,14 @@ class Enemy {
     for(int i = 0; i < ballCount; i++) {
       easyEnemyHp[i] = 5;
     }
-    bigEnemyHp = 150;
+    bigEnemyHp = 100;
     bossX = 200;
     bossY = 150;
     
     k = new int[ballCount];
     dpX = new float[ballCount];
     dpY = new float[ballCount];
+    rd = int(random(0, 3));
   }
     
   
@@ -515,8 +576,14 @@ class Enemy {
     if(bossY < +150 || bossY > height - 150) {
       bossStepY *= -1;
     }
-    bossX += bossStepX;
-    bossY += bossStepY;
+    if(rd == 0) {
+      bossX += bossStepX;
+    } else if(rd == 1){
+      bossY += bossStepY;
+    } else {
+      bossX += bossStepX;
+      bossY += bossStepY;
+    }
     fill(192);
     noStroke();
     ellipse(bossX, bossY, bossR, bossR);
@@ -650,17 +717,16 @@ void draw() {
       }
       b.MyMachineBullet();
     
-    
+      
       if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
         e.easyEnemy();
       }
-      
       e.enemyDamege(b.ballx, b.bally, b.c);
+      b.enemyBullet(e.zakoX,e.zakoY);
+      
       
       item.makeItems(e.dpX, e.dpY, e.k);
       item.drawItem(e.k);
-   
-      b.enemyBullet(e.zakoX,e.zakoY);
     
       if(timer > 30*30) {//ボスが何秒後に出現するか
         if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
@@ -713,7 +779,7 @@ void draw() {
     textSize(40);
     text("score:" + item.score, 200, 400);
     if(highScore < item.score) {
-      text("new record!!", 150, 300);
+      text("new record!!", 170, 300);
     }
     fill(0);
     rect(210, 490, 110, 50);
@@ -742,7 +808,9 @@ void draw() {
 }
 
 void mousePressed() {
-  b.ClickBullet();
+  if(t == 1) {
+    b.ClickBullet();
+  }
 }
 
 void keyPressed() {
