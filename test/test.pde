@@ -551,6 +551,7 @@ class Title{
     rect(215, 490, 110, 50);
     textSize(50);
     fill(255);
+    stroke(0);
     text("start", 215, 530);
   }
   
@@ -564,6 +565,7 @@ class Title{
   
   void setTitle(int t0){
     ti = t0;
+    mousePressed = false;
   }
   
   int getTitle(){
@@ -580,6 +582,7 @@ Enemy e;
 
 int t = 0;
 int timer = 0;
+int de = -1;
 
 void setup() {
   size(600,800);
@@ -598,16 +601,15 @@ void setup() {
   b.enemyBulletSet();
   e.setEnemy();
   b.bigEnemySet();
+  title.setTitle(t);
 }
 
-int de = -1;
 void draw() {
   bg = loadImage("haikei.jpeg");
   image(bg, 0, 0, 600, 800);
   
   if(t == 0){
     title.display();
-    title.setTitle(t);
     title.judge();
     t = title.getTitle();
   }else if(t == 1){
@@ -645,8 +647,12 @@ void draw() {
       }
     }
     timer++;
-  }else if(t == 2){
+  }else if(t == 2 || t == 3){
     fill(100);
+    stroke(0);
+    if(t == 3) {
+      text("cleared the game", 100, 100);
+    }
     textSize(80);
     text("score:" + item.score, 150, 250);
     fill(0);
@@ -658,6 +664,7 @@ void draw() {
     if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
       if(mousePressed == true){
         t = 0;
+        title.setTitle(t);
         p1.hp(5);
         b.MyMachineStart();
         b.enemyBulletSet();
@@ -666,30 +673,7 @@ void draw() {
         timer = 0;
       }
     }
-  } else {
-    fill(100);
-    text("cleared the game", 100, 100);
-    textSize(80);
-    text("score:" + item.score, 150, 250);
-    fill(0);
-    rect(210, 490, 110, 50);
-    textSize(50);
-    fill(255);
-    text("exit!", 210, 530);
-        
-    if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
-      if(mousePressed == true){
-        title.setTitle(0);
-        t = 0;
-        p1.hp(5);
-        b.MyMachineStart();
-        b.enemyBulletSet();
-        e.setEnemy();
-        b.bigEnemySet();
-        timer = 0;
-      }
-    }
-  }
+  } 
 }
 
 void mousePressed() {
