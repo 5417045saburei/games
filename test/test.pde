@@ -16,10 +16,10 @@ class player{
   }
   
   int avo = 0; //一つの弾で多段攻撃を回避
-  boolean judge(float bulletX[][], float bulletY[][]) {
+  boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[]) {
     int size = 10; //弾の大きさ
     int i, j;
-    for(i = 0; i < bulletX.length; i++) {
+    for(i = 0; i < bulletX.length; i++) { //敵の球に対する当たり判定
       for(j = 0; j < bulletX[i].length; j++) {
         if((px <= bulletX[i][j] + size && bulletX[i][j]-size <= px) && (py <= bulletY[i][j] + size && bulletY[i][j]-size <= py)) {
           if(avo+60 > timer) {//2秒間無敵
@@ -28,6 +28,17 @@ class player{
             hp--;
             avo = timer;
           }
+        }
+      }
+    }
+    
+    for(i = 0; i < myBallX.length; i++) { //自分の球に対する当たり判定
+      if((px <= myBallX[i] + size && myBallX[i]-size <= px) && (py <= myBallY[i] + size && myBallY[i]-size <= py) && c[i] == 0) {
+        if(avo+60 > timer) {
+          //ダメージ受けない
+        } else {
+          hp--;
+          avo = timer;
         }
       }
     }
@@ -41,7 +52,7 @@ class player{
   void hp(int hp0) {
     hp = hp0;
   }
-  
+    
 }
 
 
@@ -65,7 +76,7 @@ class Items{
     p_y = y0;
   }
 
-  void makeItems(){
+  void makeItems(int zX[], int zY[], int de){
     size(600, 800);
     for(int i = 0; i < 10; i++){
       items_random[i] = (float)random(0.0, 11.0);
@@ -81,8 +92,8 @@ class Items{
         items[i] = 1;
       }
     
-      x[i] = width / 2;
-      y[i] = 50.0;
+      x[i] = zX[de];
+      y[i] = zY[de];
       xSpeed[i] = random(-5.0, 5.0);
       ySpeed[i] = random(-5.0, -0.1);
     }
@@ -149,11 +160,18 @@ class bullet {
   float[] ballx = new float [1000];
   float[] bally = new float [1000];
   int clickCount = 0;
-  int[] dx = new int [1000];
-  int[] dy = new int [1000];
+  float[] dx = new float [1000];
+  float[] dy = new float [1000];
   int[] c = new int [1000];
   
-  void MyMachineStart() { 
+  void MyMachineStart() {
+    ballx = new float [1000];
+    bally = new float [1000];
+    clickCount = 0;
+    dx = new float [1000];
+    dy = new float [1000];
+    c = new int [1000];
+    
     for(int i = 0; i < dx.length; i++){
       dx[i] = 0;
       dy[i] = -3;
@@ -163,53 +181,70 @@ class bullet {
   
   void MyMachineBullet() {  
     for(int i = 0; i < clickCount; i++){
+      if(c[i] == 1) {
+        fill(0, 0, 255);
+      } else {
+        fill(255, 0, 0);
+      }
       ellipse(ballx[i], bally[i], size, size);
       ballx[i] += dx[i];
       bally[i] += dy[i];
+      if(bally[i]-size <= 0) {
+        if(c[i] == 1) { //上の壁にあたる = 敵の球になる場合角度を変える
+          dx[i] = random(-5, 5);
+          c[i] = 0;
+        } 
+        dy[i] *= -1; 
+      } 
       if(ballx[i]-size <= 0 || ballx[i]+size >= width){
         dx[i] *= -1;
-        c[i] = 0;
       }
-      if(bally[i]-size <= 0 || bally[i]+size >= height){
-        
+      if(bally[i]+size >= height){
         dy[i] *= -1;
-        c[i] = 0;
       }
     }
   }
   
   void ClickBullet() {
     ballx[clickCount] = mouseX;
-    bally[clickCount] = mouseY;
+    bally[clickCount] = mouseY - 15;
     clickCount += 1;
   }
   
   
-  int BulletTotal = 10;
+  int BulletTotal = 20;
   int enemyCount = 10;
-  float[][] eBulletX = new float [enemyCount][BulletTotal];
-  float[][] eBulletY = new float [enemyCount][BulletTotal];
-  float[][] BulletSpeadX = new float [enemyCount][BulletTotal];
-  float[][] BulletSpeadY = new float [enemyCount][BulletTotal];
-  int[][] rand = new int [enemyCount][BulletTotal];
-  int[][] Bulletjudge = new int [enemyCount][BulletTotal];
-  int[] Btimer = new int[enemyCount];
+  float[][] eBulletX;
+  float[][] eBulletY;
+  float[][] BulletSpeadX;
+  float[][] BulletSpeadY;
+  int[][] rand;
+  int[][] Bulletjudge;
+  int[] Btimer;
   
   void enemyBulletSet() {  
     int i, j;
-    
+    eBulletX = new float [enemyCount][BulletTotal];
+    eBulletY = new float [enemyCount][BulletTotal];
+    BulletSpeadX = new float [enemyCount][BulletTotal];
+    BulletSpeadY = new float [enemyCount][BulletTotal];
+    rand = new int [enemyCount][BulletTotal];
+    Bulletjudge = new int [enemyCount][BulletTotal];
+    Btimer = new int[enemyCount];
+  
     for(i = 0; i < enemyCount; i++) {
       for(j = 0; j < BulletTotal; j++) {
-        rand[i][j] = int(random(1, 5)) * 30;
-      }
-    }
-    
-    for(i = 0; i < enemyCount; i++) {
-      for(j = 0; j < BulletTotal; j++) {
+        rand[i][j] = int(random(1, 5)) * 30; //どれぐらいの時間差で発射するか
         BulletSpeadX[i][j] = random(-5, 5);
         BulletSpeadY[i][j] = random(0, 4);
       }
     }
+    
+    for(i = 0; i < enemyCount; i++) {
+      Btimer[i] = 0;
+    }
+    
+    
   }
     
   void enemyBullet(int eX[], int eY[]){
@@ -229,7 +264,7 @@ class bullet {
           eBulletX[i][j] = eX[i];
           eBulletY[i][j] = eY[i];
           Bulletjudge[i][j] = 1;
-          Btimer[i] = 0;
+          Btimer[i] = 0; //時間差で発射するため
           break;
         }
         
@@ -249,25 +284,76 @@ class bullet {
             BulletSpeadY[i][j] *= -1;
           }
           
-          fill(125);
+          fill(255, 0, 0);
           ellipse(eBulletX[i][j], eBulletY[i][j], size, size);
         }
       }
     }
   }
   
+  int BT = 10;
+  float[] BBX = new float [BT]; //bossBulletX
+  float[] BBY = new float [BT];
+  float[] BSX = new float [BT]; //BossSpeadX
+  float[] BSY = new float [BT];
+  int[] BJ = new int [BT];//BossJudge
+  int rd;
+  
+  void bigEnemySet() {
+    int i;
+    float stepX,stepY;
+    rd = int(random(0, 3));
+    rd = 0;
+    if(rd == 0) {
+      stepX = 0.1;
+      stepY = 0.1;
+      for(i = 0; i < BBX.length; i++) {
+        BSX[i] = stepX;
+        BSX[i] = stepY;
+        stepX += 0.1;
+        BJ[i] = 0;
+      }
+    }
+  }
+  
+  void bigEnemyBullet(int boX,int boY) {
+    int i;
+    for(i = 0; i < BBX.length; i++) {
+      if(BJ[i] == 0) {
+        BBX[i] = boX;
+        BBY[i] = boY;
+        BJ[i] = 1;
+      }
+    }
+    for(i = 0; i < BBX.length; i++) {
+      BBX[i] += BSX[i];
+      BBY[i] += BSY[i];
+      
+      if(BBX[i]+size > width || BBX[i]-size < 0) {
+        BSX[i] *= -1;
+      }
+      if(BBY[i]+size > height || BBY[i]-size < 0) {
+         BSY[i] *= -1;
+      }
+      
+      fill(255, 0 ,0);
+      ellipse(BBX[i], BBY[i], size,size);
+    }
+    
+  }
+  
   void delete() {
     int i, j;
     for(i = 0; i < enemyCount; i++) {
       for(j = 0; j < BulletTotal; j++) {
-        eBulletX[i][j] = -5;
-        eBulletY[i][j] = -5;
+        eBulletX[i][j] = -15;
+        eBulletY[i][j] = -15;
       }
     }
     
-    for(i = 0; i < ballx.length; i++) {
-      ballx[i] = -5;
-      bally[i] = -5;
+    for(i = 0; i < clickCount; i++) {
+      ballx[i] = -15;
+      bally[i] = -15;
     }
   }
 }
@@ -288,10 +374,10 @@ class Enemy {
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
-      zakoX[i] = int(random(10, 380));
+      zakoX[i] = int(random(15, 380));
       zakoY[i] = int(random(15, 31));
       stepX[i] = int(random(-5, 5));
-      stepY[i] = int(random(1, 3));
+      stepY[i] = int(random(0, 3));
     }
     
     for(int i = 0; i < ballCount; i++) {
@@ -317,24 +403,25 @@ class Enemy {
     }
   }
   
-  void enemyDamege(float bX[], float bY[]) {
+  
+  int enemyDamege(float bX[], float bY[], int c[]) {
     int i, j;
     for(i = 0; i < ballCount; i++) {
       for(j = 0; j < bX.length; j++) {
-        if((zakoX[i] <= bX[j] + 10 && bX[j] - 10 <= zakoX[i]) && (zakoY[i] <= bY[j] + 10 && bY[j]-10 <= zakoY[i])) {
+        if((zakoX[i] <= bX[j] + 10 && bX[j] - 10 <= zakoX[i]) && (zakoY[i] <= bY[j] + 10 && bY[j]-10 <= zakoY[i]) && c[j] == 1) {
           easyEnemyHp[i]--;
-          bX[j] = -5;
-          bY[j] = -5;
+          bX[j] = -15;
+          bY[j] = -15;
+          if(easyEnemyHp[i] <= 0) {
+            zakoX[i] = -100;
+            zakoY[i] = -5;
+            return i;
+          }
         }
       }
     }
-    
-    for(i = 0; i < ballCount; i++) {
-      if(easyEnemyHp[i] < 0) {
-        zakoX[i] = -5;
-        zakoY[i] = -5;
-      }
-    }
+   
+    return -1;
   }
   
   void bigEnemy() {
@@ -389,10 +476,11 @@ void setup() {
   e = new Enemy();  
   
   p1.hp(5);
-  item.makeItems();
+  //item.makeItems();
   b.MyMachineStart();
   b.enemyBulletSet();
   e.setEnemy();
+  b.bigEnemySet();
 }
 
 void draw() {
@@ -400,20 +488,28 @@ void draw() {
     background(255);
     p1.display();
     item.setItem(p1.px, p1.py);
-    if(p1.judge(b.eBulletX, b.eBulletY) == false){ //当たったらhp減少 falseでゲームオーバー
+    
+    if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c) == false){ //当たったらhp減少 falseでゲームオーバー
       background(255);
       return;
     }
     item.drawItem();
     b.MyMachineBullet();
+    
     if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
       e.easyEnemy();
     }
-    e.enemyDamege(b.ballx, b.bally);
+    int de = -1; 
+    e.enemyDamege(b.ballx, b.bally, b.c);
+    if(de != -1) {
+      item.makeItems(e.zakoX, e.zakoY, de);
+    }
     b.enemyBullet(e.zakoX,e.zakoY);
+    
     
     if(timer > 30*30) {
       e.bigEnemy();
+      b.bigEnemyBullet(e.bossX, e.bossY);
     }
   }
   timer++;
@@ -426,5 +522,12 @@ void mousePressed() {
 void keyPressed() {
   if(key == 'b' || key == 'B') {
     b.delete();
+  }
+  if(key == 'r' || key == 'R') {
+    p1.hp(5);
+    b.MyMachineStart();
+    b.enemyBulletSet();
+    e.setEnemy();
+    timer = 0;
   }
 }
