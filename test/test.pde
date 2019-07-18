@@ -576,7 +576,8 @@ void draw() {
       e.easyEnemy();
     }
     int de = -1; 
-    e.enemyDamege(b.ballx, b.bally, b.c);
+    de = e.enemyDamege(b.ballx, b.bally, b.c);
+    println(de);
     if(de != -1) {
       item.makeItems(e.zakoX, e.zakoY, de);
     }
