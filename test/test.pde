@@ -16,41 +16,61 @@ class player{
   }
   
   int avo = 0; //一つの弾で多段攻撃を回避
-  boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[]) {
+  boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[], float BBX[], float BBY[]) {
     int size = 10; //弾の大きさ
     int i, j;
-    for(i = 0; i < bulletX.length; i++) { //敵の球に対する当たり判定
+    
+    if(hp <= 0) {// 自分がやられたかどうか
+      return false;
+    } 
+    
+    if(avo > timer) {//2秒間無敵
+      //ダメージを受けない
+      fill(0, 255, 0);
+      rect(px-15, py-15, 30, 30);
+      stroke(255, 0, 0);
+      line(px, py-15, px-15, py+15);
+      line(px, py-15, px+15, py+15);
+      line(px, py+15, px-15, py-15);
+      line(px, py+15, px+15, py-15);
+      return true;
+    } 
+    
+    for(i = 0; i < bulletX.length; i++) { //敵の弾に対する当たり判定
       for(j = 0; j < bulletX[i].length; j++) {
         if((px <= bulletX[i][j] + size && bulletX[i][j]-size <= px) && (py <= bulletY[i][j] + size && bulletY[i][j]-size <= py)) {
-          if(avo+60 > timer) {//2秒間無敵
-            //ダメージを受けない
-          } else {
-            hp--;
-            avo = timer;
-          }
+          hp--;
+          avo = timer + 60;
+          break;
         }
+        if(avo > timer) {
+          break;
+        }
+      }
+    }
+    
+    for(i = 0; i < BBX.length; i++) { //ボスの弾に対する当たり判定
+      if((px <= BBX[i] + size && BBX[i]-size <= px) && (py <= BBY[i] + size && BBY[i]-size <= py)) {
+        hp--;
+        avo = timer + 60;
+        break;
       }
     }
     
     for(i = 0; i < myBallX.length; i++) { //自分の球に対する当たり判定
       if((px <= myBallX[i] + size && myBallX[i]-size <= px) && (py <= myBallY[i] + size && myBallY[i]-size <= py) && c[i] == 0) {
-        if(avo+60 > timer) {
-          //ダメージ受けない
-        } else {
-          hp--;
-          avo = timer;
-        }
+        hp--;
+        avo = timer + 60;
+        break;
       }
     }
-    if(hp == 0) {
-      return false;
-    } else {
-      return true;
-    }
+   
+    return true;
   }
   
   void hp(int hp0) {
     hp = hp0;
+    avo = 0;
   }
     
 }
@@ -155,12 +175,12 @@ class Items{
 
 class bullet {
   int size = 10;
-  float[] ballx = new float [1000];
-  float[] bally = new float [1000];
-  int clickCount = 0;
-  float[] dx = new float [1000];
-  float[] dy = new float [1000];
-  int[] c = new int [1000];
+  float[] ballx;
+  float[] bally;
+  int clickCount;
+  float[] dx;
+  float[] dy;
+  int[] c;
   
   void MyMachineStart() {
     ballx = new float [1000];
@@ -289,7 +309,7 @@ class bullet {
     }
   }
   
-  int BT = 100;
+  int BT = 200;
   float[] BBX = new float [BT]; //bossBulletX
   float[] BBY = new float [BT];
   float[] BSX = new float [BT]; //BossSpeadX
@@ -302,11 +322,10 @@ class bullet {
   void bigEnemySet() {
     int i;
     float stepX,stepY;
-    rd = int(random(0, 3));
-    rd = 0;
+    rd = int(random(0, 2));
     if(rd == 0) {
-      stepX = 0.1;
-      stepY = 4;
+      stepX = 0.5;
+      stepY = 2;
       for(i = 0; i < BBX.length; i++) {
         BBT[i] = 10;
         BSX[i] = stepX;
@@ -314,8 +333,28 @@ class bullet {
         if(stepX > 10) {
           stepX *= -1;
         }
-        stepX += 0.1;
+        stepX += 1;
         BJ[i] = 0;
+        BBX[i] = -30;
+        BBY[i] = -30;
+      }
+    } else if(rd == 1){
+      stepX = 0;
+      stepY = 2;
+      for(i = 0; i < BBX.length; i++) {
+        if(i % 5 == 0) {
+          BBT[i] = 90;
+        }
+        BSX[i] = stepX;
+        BSY[i] = stepY;
+        stepX += 0.5;
+        if(stepX > 5) {
+          stepX *= -1;
+         
+        }
+        BJ[i] = 0;
+        BBX[i] = -30;
+        BBY[i] = -30;
       }
     }
   }
@@ -324,7 +363,6 @@ class bullet {
     int i;
    
     BBTR++;
-    
     BJ[0] = 1;
     for(i = 1; i < BBX.length; i++) {
       if(BJ[i] == 0 && BBT[i] <= BBTR && BJ[i-1] == 1) {
@@ -343,7 +381,7 @@ class bullet {
           BSX[i] *= -1;
         }
         if(BBY[i]+size > height || BBY[i]-size < 0) {
-           BSY[i] *= -1;
+          BSY[i] *= -1;
         }
       
         fill(255, 0 ,0);
@@ -366,6 +404,12 @@ class bullet {
       ballx[i] = -15;
       bally[i] = -15;
     }
+    
+    for(i = 0; i < BBX.length; i++) {
+      BBX[i] = -15;
+      BBY[i] = -15;
+    }
+    
   }
 }
 
@@ -376,13 +420,13 @@ class Enemy {
   int zakoR = 30;
   int[] stepX = new int[ballCount];
   int[] stepY = new int[ballCount];
-  int bossX = 200;
-  int bossY = 150;
+  int bossX;
+  int bossY;
   int bossR = 160;
   int bossStepX = 2;
   int bossStepY = 1;
   int[] easyEnemyHp = new int[ballCount];
-  int bigEnemyHp = 5;
+  int bigEnemyHp;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
@@ -395,6 +439,9 @@ class Enemy {
     for(int i = 0; i < ballCount; i++) {
       easyEnemyHp[i] = 5;
     }
+    bigEnemyHp = 150;
+    bossX = 200;
+    bossY = 150;
   }
     
   
@@ -440,7 +487,7 @@ class Enemy {
     if(bossX < bossR/2 || bossX > width - bossR/2) {
       bossStepX *= -1;
     }
-    if(bossY < -150 || bossY > height - 150) {
+    if(bossY < +150 || bossY > height - 150) {
       bossStepY *= -1;
     }
     bossX += bossStepX;
@@ -517,7 +564,7 @@ void draw() {
     p1.display();
     item.setItem(p1.px, p1.py);
     
-    if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c) == false){ //当たったらhp減少 falseでゲームオーバー
+    if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c, b.BBX, b.BBY) == false){ //当たったらhp減少 falseでゲームオーバー
       background(255);
       return;
     }
@@ -560,6 +607,7 @@ void keyPressed() {
     b.MyMachineStart();
     b.enemyBulletSet();
     e.setEnemy();
+    b.bigEnemySet();
     timer = 0;
   }
 }
