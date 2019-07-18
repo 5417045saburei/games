@@ -88,6 +88,7 @@ class Items{
   int[] bullet_ver = {1, 0, 0};
   int score = 0;
   int power = 0;
+  int p = 1;
   
   void setItem(int x0, int y0){
     p_x = x0;
@@ -164,6 +165,10 @@ class Items{
       
           if(items[i] == 1){
             power++;
+            if(power == 10){
+              p++;
+              power = 0;
+            }
           }
           if(items[i] == 2){
             score++;
@@ -470,7 +475,7 @@ class Enemy {
     for(i = 0; i < ballCount; i++) {
       for(j = 0; j < bX.length; j++) {
         if((zakoX[i] <= bX[j] + 10 && bX[j] - 10 <= zakoX[i]) && (zakoY[i] <= bY[j] + 10 && bY[j]-10 <= zakoY[i]) && c[j] == 1) {
-          easyEnemyHp[i]--;
+          easyEnemyHp[i] -= item.p;
           bX[j] = -15;
           bY[j] = -15;
           if(easyEnemyHp[i] <= 0) {
@@ -515,7 +520,7 @@ class Enemy {
       if(((bossX-bX[i])*(bossX-bX[i])) + ((bossY-bY[i])*(bossY-bY[i])) <= (bossR/2)*(bossR/2) && c[i] == 1) {
         bX[i] = -15;
         bY[i] = -15;
-        bigEnemyHp--;
+        bigEnemyHp -= item.p;
       }
     }
     return true;
