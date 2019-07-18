@@ -94,7 +94,7 @@ class Items{
     p_y = y0;
   }
 
-  void makeItems(int zX[], int zY[], int de){
+  void makeItems(float zX[], float zY[], int de){
     size(600, 800);
     for(int i = 0; i < 10; i++){
       items_random[i] = (float)random(0.0, 11.0);
@@ -265,7 +265,7 @@ class bullet {
     
   }
     
-  void enemyBullet(int eX[], int eY[]){
+  void enemyBullet(float eX[], float eY[]){
     int i,j;
     
     for(i = 0; i < enemyCount; i++) {
@@ -359,7 +359,7 @@ class bullet {
     }
   }
   
-  void bigEnemyBullet(int boX,int boY) {
+  void bigEnemyBullet(float boX,float boY) {
     int i;
    
     BBTR++;
@@ -415,25 +415,25 @@ class bullet {
 
 class Enemy {
   int ballCount = 10;
-  int[] zakoX = new int[ballCount];
-  int[] zakoY = new int[ballCount];
+  float[] zakoX = new float[ballCount];
+  float[] zakoY = new float[ballCount];
   int zakoR = 30;
-  int[] stepX = new int[ballCount];
-  int[] stepY = new int[ballCount];
-  int bossX;
-  int bossY;
+  float[] stepX = new float[ballCount];
+  float[] stepY = new float[ballCount];
+  float bossX;
+  float bossY;
   int bossR = 160;
-  int bossStepX = 2;
-  int bossStepY = 1;
+  float bossStepX = 2;
+  float bossStepY = 1;
   int[] easyEnemyHp = new int[ballCount];
   int bigEnemyHp;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
-      zakoX[i] = int(random(15, 380));
-      zakoY[i] = int(random(20, 31));
-      stepX[i] = int(random(-5, 5));
-      stepY[i] = int(random(0, 3));
+      zakoX[i] = random(15, 380);
+      zakoY[i] = random(20, 31);
+      stepX[i] = random(-5, 5);
+      stepY[i] = random(0, 3);
     }
     
     for(int i = 0; i < ballCount; i++) {
