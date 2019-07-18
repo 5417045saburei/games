@@ -662,6 +662,10 @@ void keyPressed() {
     b.delete();
   }
   
+  if(key == 'a' || key == 'A'){
+    b.ClickBullet();
+  }
+  
   if(key == 'r' || key == 'R') {//リスタート
     p1.hp(5);
     b.MyMachineStart();
@@ -669,5 +673,6 @@ void keyPressed() {
     e.setEnemy();
     b.bigEnemySet();
     timer = 0;
+    t = 0;
   }
 }
