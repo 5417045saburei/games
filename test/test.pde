@@ -55,8 +55,6 @@ class player{
     
 }
 
-
-
 class Items{
   int p_x;
   int p_y;
@@ -291,13 +289,15 @@ class bullet {
     }
   }
   
-  int BT = 10;
+  int BT = 100;
   float[] BBX = new float [BT]; //bossBulletX
   float[] BBY = new float [BT];
   float[] BSX = new float [BT]; //BossSpeadX
   float[] BSY = new float [BT];
-  int[] BJ = new int [BT];//BossJudge
+  int[] BJ = new int [BT]; //BossJudge
   int rd;
+  int[] BBT = new int [BT]; //BossBulletTime
+  int BBTR = 0;
   
   void bigEnemySet() {
     int i;
@@ -306,10 +306,14 @@ class bullet {
     rd = 0;
     if(rd == 0) {
       stepX = 0.1;
-      stepY = 0.1;
+      stepY = 4;
       for(i = 0; i < BBX.length; i++) {
+        BBT[i] = 10;
         BSX[i] = stepX;
-        BSX[i] = stepY;
+        BSY[i] = stepY;
+        if(stepX > 10) {
+          stepX *= -1;
+        }
         stepX += 0.1;
         BJ[i] = 0;
       }
@@ -318,26 +322,33 @@ class bullet {
   
   void bigEnemyBullet(int boX,int boY) {
     int i;
-    for(i = 0; i < BBX.length; i++) {
-      if(BJ[i] == 0) {
+   
+    BBTR++;
+    
+    BJ[0] = 1;
+    for(i = 1; i < BBX.length; i++) {
+      if(BJ[i] == 0 && BBT[i] <= BBTR && BJ[i-1] == 1) {
         BBX[i] = boX;
         BBY[i] = boY;
         BJ[i] = 1;
+        BBTR = 0;
       }
     }
+    
     for(i = 0; i < BBX.length; i++) {
-      BBX[i] += BSX[i];
-      BBY[i] += BSY[i];
+      if(BJ[i] == 1) {
+        BBX[i] += BSX[i];
+        BBY[i] += BSY[i];
+        if(BBX[i]+size > width || BBX[i]-size < 0) {
+          BSX[i] *= -1;
+        }
+        if(BBY[i]+size > height || BBY[i]-size < 0) {
+           BSY[i] *= -1;
+        }
       
-      if(BBX[i]+size > width || BBX[i]-size < 0) {
-        BSX[i] *= -1;
+        fill(255, 0 ,0);
+        ellipse(BBX[i], BBY[i], size, size);
       }
-      if(BBY[i]+size > height || BBY[i]-size < 0) {
-         BSY[i] *= -1;
-      }
-      
-      fill(255, 0 ,0);
-      ellipse(BBX[i], BBY[i], size,size);
     }
     
   }
@@ -366,16 +377,17 @@ class Enemy {
   int[] stepX = new int[ballCount];
   int[] stepY = new int[ballCount];
   int bossX = 200;
-  int bossY = 20;
+  int bossY = 150;
   int bossR = 160;
-  int bossStepX = 4;
+  int bossStepX = 2;
   int bossStepY = 1;
   int[] easyEnemyHp = new int[ballCount];
+  int bigEnemyHp = 5;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
       zakoX[i] = int(random(15, 380));
-      zakoY[i] = int(random(15, 31));
+      zakoY[i] = int(random(20, 31));
       stepX[i] = int(random(-5, 5));
       stepY[i] = int(random(0, 3));
     }
@@ -428,7 +440,7 @@ class Enemy {
     if(bossX < bossR/2 || bossX > width - bossR/2) {
       bossStepX *= -1;
     }
-    if(bossY < -150 || bossY > height + 150) {
+    if(bossY < -150 || bossY > height - 150) {
       bossStepY *= -1;
     }
     bossX += bossStepX;
@@ -441,6 +453,22 @@ class Enemy {
     line(bossX + 10, bossY, bossX + 50, bossY - 40);
     line(bossX, bossY + 10, bossX - 40, bossY + 50);
     line(bossX, bossY + 10, bossX + 40, bossY + 50);
+    
+  }
+  
+  boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
+    int i;
+    if(bigEnemyHp < 0) {
+      return false;
+    }
+    for(i = 0; i < bX.length; i++) {
+      if(((bossX-bX[i])*(bossX-bX[i])) + ((bossY-bY[i])*(bossY-bY[i])) <= (bossR/2)*(bossR/2) && c[i] == 1) {
+        bX[i] = -15;
+        bY[i] = -15;
+        bigEnemyHp--;
+      }
+    }
+    return true;
   }
   
   boolean easyEnemyIn() { //画面内に全てのザコ敵がいるかどうか
@@ -496,6 +524,7 @@ void draw() {
     item.drawItem();
     b.MyMachineBullet();
     
+    /*
     if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
       e.easyEnemy();
     }
@@ -505,11 +534,13 @@ void draw() {
       item.makeItems(e.zakoX, e.zakoY, de);
     }
     b.enemyBullet(e.zakoX,e.zakoY);
+    */
     
-    
-    if(timer > 30*30) {
-      e.bigEnemy();
-      b.bigEnemyBullet(e.bossX, e.bossY);
+    if(timer > 30*5) {
+      if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
+        b.bigEnemyBullet(e.bossX, e.bossY);
+        e.bigEnemy();
+      }
     }
   }
   timer++;
@@ -520,10 +551,11 @@ void mousePressed() {
 }
 
 void keyPressed() {
-  if(key == 'b' || key == 'B') {
+  if(key == 'b' || key == 'B') {//弾を消す
     b.delete();
   }
-  if(key == 'r' || key == 'R') {
+  
+  if(key == 'r' || key == 'R') {//リスタート
     p1.hp(5);
     b.MyMachineStart();
     b.enemyBulletSet();
