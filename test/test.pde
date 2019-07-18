@@ -82,17 +82,23 @@ class player{
 class Items{
   int p_x;
   int p_y;
-  float[] x = new float[10];
-  float[] y = new float[10];
-  float[] xSpeed = new float[10];
-  float[] ySpeed = new float[10];
+  float[][] x = new float[10][10];
+  float[][] y = new float[10][10];
+  float[][] xSpeed = new float[10][10];
+  float[][] ySpeed = new float[10][10];
   float[] items_random = new float[10];
-  int[] items = new int[10];
-  int[] get = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  int[] bullet_ver = {1, 0, 0};
-  int score = 0;
-  int power = 0;
-  int p = 1;
+  int[][] items = new int[10][10];
+  int[][] get;
+  int score;
+  int power;
+  int p;
+  
+  void StartItem() {
+    score = 0;
+    power = 0;
+    p = 1;
+    get = new int[10][10];
+  }
   
   void setItem(int x0, int y0){
     p_x = x0;
@@ -100,86 +106,82 @@ class Items{
     fill(255);
     textSize(30);
     text("score:" + score, 440, 30);
+    textSize(20);
+    text("power:" + p, width-100, height-20);
   }
 
-  void makeItems(float zX[], float zY[], int de){
+   void makeItems(float zX[], float zY[], int de[]){
     size(600, 800);
     for(int i = 0; i < 10; i++){
-      for(int j = 0; j < 10; j++) {
+      if(de[i] == 1) {
+        for(int j = 0; j < 10; j++) {
+          items_random[j] = (float)random(0.0, 5.0);
+          if(items_random[j] < 0.3){
+            items[i][j] = 4;
+          }else if(0.3 <= items_random[j] && items_random[j] < 0.4){
+            items[i][j] = 3;
+          }else if(0.4 <= items_random[j] && items_random[j] < 0.7){
+            items[i][j] = 1;
+          }else {
+            items[i][j] = 2;
+          }
+          
+          x[i][j] = zX[i];
+          y[i][j] = zY[i];
+          xSpeed[i][j] = random(-5.0, 5.0);
+          ySpeed[i][j] = random(-5.0, -0.1);
+        }
+        de[i] = 2;
       }
-      items_random[i] = (float)random(0.0, 11.0);
-      if(items_random[i] < 0.3){
-        items[i] = 5;
-      }else if(0.3 <= items_random[i] && items_random[i] < 0.6){
-        items[i] = 4;
-      }else if(0.6 <= items_random[i] && items_random[i] < 0.9){
-        items[i] = 3;
-      }else if(0.9 <= items_random[i] && items_random[i] < 8.0){
-        items[i] = 2;
-      }else{
-        items[i] = 1;
-      }
-    
-      x[i] = zX[de];
-      y[i] = zY[de];
-      println(zX[de]);
-      xSpeed[i] = random(-5.0, 5.0);
-      ySpeed[i] = random(-5.0, -0.1);
     }
   }
 
-  void drawItem(){
+  void drawItem(int de[]){
     for(int i = 0; i < 10; i++){
-      if(get[i] == 0){
-        if(items[i] == 1){
-          fill(255, 0, 0);
-        }else if(items[i] == 2){
-          fill(0, 0, 255);
-        }else if(items[i] == 3){
-          fill(0, 255, 255);
-        }else if(items[i] == 4){
-          fill(255, 255, 0);
-        }else{
-          fill(255, 0, 255);
-        }
+      if(de[i] == 2) {
+        for(int j = 0; j < 10; j++) {
+          if(get[i][j] == 0){
+            if(items[i][j] == 1){
+              fill(255, 255, 0);
+            }else if(items[i][j] == 2){
+              fill(0, 255, 255);
+            }else if(items[i][j] == 3){
+              fill(0, 255, 0);
+            }else{
+              fill(255, 0, 255);
+            }
     
-        rect(x[i], y[i], 10, 10);
-        x[i] += xSpeed[i];
-        y[i] += ySpeed[i];
-        if(xSpeed[i] < 0.0){
-          xSpeed[i] += 0.1;
-        }
-        if(xSpeed[i] > 0.0){
-          xSpeed[i] -= 0.1;
-        }
-        ySpeed[i] += 0.05;
+            rect(x[i][j], y[i][j], 10, 10);
+            x[i][j] += xSpeed[i][j];
+            y[i][j] += ySpeed[i][j];
+            if(xSpeed[i][j] < 0.0){
+              xSpeed[i][j] += 0.1;
+            }
+            if(xSpeed[i][j] > 0.0){
+              xSpeed[i][j] -= 0.1;
+            }
+            ySpeed[i][j] += 0.05;
       
-        if((p_x <= x[i] + 20.0 && x[i] <= p_x + 40.0) && (p_y <= y[i] + 20.0 && y[i] <= p_y + 40.0)){
-          if(items[i] == 3){ 
-            bullet_ver[0] = 1;
-            bullet_ver[1] = 0;
-            bullet_ver[2] = 0;
-          }else if(items[i] == 4){
-            bullet_ver[0] = 0;
-            bullet_ver[1] = 1;
-            bullet_ver[2] = 0;
-          }else if(items[i] == 5){
-            bullet_ver[0] = 0;
-            bullet_ver[1] = 0;
-            bullet_ver[2] = 1;
-          }
+            if((p_x <= x[i][j] + 20.0 && x[i][j] <= p_x + 40.0) && (p_y <= y[i][j] + 20.0 && y[i][j] <= p_y + 40.0)){
+              if(items[i][j] == 3){ 
+                b.delete();
+              }else if(items[i][j] == 4){
+                p1.hp += 1;
+              }
       
-          if(items[i] == 1){
-            power++;
-            if(power == 10) {
-              p++;
-              power = 0;
+              if(items[i][j] == 1){
+                power++;
+                if(power == 5) {
+                  p++;
+                  power = 0;
+                }
+              }
+              if(items[i][j] == 2){
+                score++;
+              } 
+              get[i][j] = 1;
             }
           }
-          if(items[i] == 2){
-            score++;
-          } 
-          get[i] = 1;
         }
       }
     }
@@ -440,6 +442,9 @@ class Enemy {
   float bossStepY = 1;
   int[] easyEnemyHp = new int[ballCount];
   int bigEnemyHp;
+  int[] k;
+  float[] dpX;//deathPositionX
+  float[] dpY;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
@@ -455,6 +460,10 @@ class Enemy {
     bigEnemyHp = 150;
     bossX = 200;
     bossY = 150;
+    
+    k = new int[ballCount];
+    dpX = new float[ballCount];
+    dpY = new float[ballCount];
   }
     
   
@@ -476,10 +485,8 @@ class Enemy {
   }
   
   
-  int[] k = new int[ballCount];
-  float[] dpX = new float[ballCount];//deathPositionX
-  float[] dpY = new float[ballCount];
-  int enemyDamege(float bX[], float bY[], int c[]) {
+  
+  void enemyDamege(float bX[], float bY[], int c[]) {
     int i, j;
     for(i = 0; i < ballCount; i++) {
       for(j = 0; j < bX.length; j++) {
@@ -488,23 +495,17 @@ class Enemy {
           bX[j] = -15;
           bY[j] = -15;
           if(easyEnemyHp[i] <= 0) {
-            dpX[i] = zakoX[i];
-            dpY[i] = zakoY[i];
-            zakoX[i] = -100;
-            zakoY[i] = -5;
-            k[i] = 1;
+            if(k[i] == 0) { 
+              dpX[i] = zakoX[i];
+              dpY[i] = zakoY[i];
+              zakoX[i] = -100;
+              zakoY[i] = -5;
+              k[i] = 1;
+            }
           }
         }
       }
     }
-    for(i = 0; i < ballCount; i++) {
-      if(k[i] == 1) {
-        k[i] = 2;
-        return i;
-      }
-    }
-   
-    return -1;
   }
   
   void bigEnemy() {
@@ -524,7 +525,10 @@ class Enemy {
     line(bossX + 10, bossY, bossX + 50, bossY - 40);
     line(bossX, bossY + 10, bossX - 40, bossY + 50);
     line(bossX, bossY + 10, bossX + 40, bossY + 50);
-    
+    fill(255);
+    ellipse(bossX, bossY, 50, 50);
+    fill(0);
+    ellipse(bossX, bossY, 25, 30);
   }
   
   boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
@@ -573,6 +577,8 @@ class Title{
     textSize(50);
     fill(255);
     text("start", 215, 530);
+    textSize(20);
+    text("high score:" + highScore, width-150, height-10);
   }
   
   void judge(){
@@ -602,8 +608,8 @@ Enemy e;
 
 int t = 0;
 int timer = 0;
-int de1 = -1;
-int de2 = -1;
+int end = 0;
+int highScore = 0;
 
 void setup() {
   size(600,800);
@@ -622,11 +628,13 @@ void setup() {
   e.setEnemy();
   b.bigEnemySet();
   title.setTitle(t);
+  item.StartItem();
 }
 
 void draw() {
   bg = loadImage("haikei.jpeg");
   image(bg, 0, 0, 600, 800);
+  
   if(t == 0){
     title.display();
     title.judge();
@@ -647,14 +655,11 @@ void draw() {
         e.easyEnemy();
       }
       
-      de1 = e.enemyDamege(b.ballx, b.bally, b.c);
-      if(de1 != -1 || de2 != -1) {
-        if(de1 != -1) {
-          de2 = de1;
-          item.makeItems(e.dpX, e.dpY, de2);
-        }
-        item.drawItem();
-      }
+      e.enemyDamege(b.ballx, b.bally, b.c);
+      
+      item.makeItems(e.dpX, e.dpY, e.k);
+      item.drawItem(e.k);
+   
       b.enemyBullet(e.zakoX,e.zakoY);
     
       if(timer > 30*30) {//ボスが何秒後に出現するか
@@ -669,6 +674,10 @@ void draw() {
     fill(100);
     textSize(80);
     text("score:" + item.score, 150, 250);
+    fill(255, 0, 50);
+    if(highScore < item.score) {
+      text("new record!!", 80, 330);
+    }
     fill(0);
     rect(210, 490, 110, 50);
     textSize(50);
@@ -677,6 +686,9 @@ void draw() {
         
     if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
       if(mousePressed == true){
+        if(highScore < item.score) {
+          highScore = item.score;
+        }
         t = 0;
         title.setTitle(t);
         p1.hp(5);
@@ -685,9 +697,14 @@ void draw() {
         e.setEnemy();
         b.bigEnemySet();
         timer = 0;
+        item.StartItem();
       }
     }
   }else{
+    if(end == 0){
+      item.score += 100;
+      end++;
+    }    
     fill(255, 0, 30);
     textSize(100);
     text("Mission", 100, 120);
@@ -695,6 +712,9 @@ void draw() {
     fill(0, 255, 125);
     textSize(40);
     text("score:" + item.score, 200, 400);
+    if(highScore < item.score) {
+      text("new record!!", 150, 300);
+    }
     fill(0);
     rect(210, 490, 110, 50);
     textSize(50);
@@ -703,6 +723,10 @@ void draw() {
         
     if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
       if(mousePressed == true){
+        if(highScore < item.score) {
+          highScore = item.score;
+        }
+        end = 0;
         t = 0;
         title.setTitle(t);
         p1.hp(5);
@@ -711,6 +735,7 @@ void draw() {
         e.setEnemy();
         b.bigEnemySet();
         timer = 0;
+        item.StartItem();
       }
     }
   }
