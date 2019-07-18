@@ -591,6 +591,7 @@ int t = 0;
 int timer = 0;
 int de1 = -1;
 int de2 = -1;
+int end = 0;
 
 void setup() {
   size(600,800);
@@ -676,7 +677,10 @@ void draw() {
       }
     }
   }else{
-    item.score += 100;
+    if(end == 0){
+      item.score += 100;
+      end++;
+    }
     fill(255, 0, 30);
     textSize(100);
     text("Mission", 100, 120);
