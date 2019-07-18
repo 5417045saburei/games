@@ -13,10 +13,14 @@ class player{
     line(px, py-15, px+15, py+15);
     line(px, py+15, px-15, py-15);
     line(px, py+15, px+15, py-15);
+    
+    fill(255);
+    textSize(30);
+    text("hp:" + hp, 470, 70);
   }
   
-  int avo = 0; //一つの弾で多段攻撃を回避
-  boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[], float BBX[], float BBY[]) {
+    int avo = 0; //一つの弾で多段攻撃を回避
+    boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[], float BBX[], float BBY[]) {
     int size = 10; //弾の大きさ
     int i, j;
     
@@ -92,6 +96,9 @@ class Items{
   void setItem(int x0, int y0){
     p_x = x0;
     p_y = y0;
+    fill(255);
+    textSize(30);
+    text("score:" + score, 440, 30);
   }
 
   void makeItems(float zX[], float zY[], int de){
@@ -112,14 +119,13 @@ class Items{
     
       x[i] = zX[de];
       y[i] = zY[de];
+      println(zX[de]);
       xSpeed[i] = random(-5.0, 5.0);
       ySpeed[i] = random(-5.0, -0.1);
     }
   }
 
   void drawItem(){
-    textSize(10);
-    text("score:" + score, 300, 20);
     for(int i = 0; i < 10; i++){
       if(get[i] == 0){
         if(items[i] == 1){
@@ -200,7 +206,7 @@ class bullet {
   void MyMachineBullet() {  
     for(int i = 0; i < clickCount; i++){
       if(c[i] == 1) {
-        fill(100, 10, 200);
+        fill(0, 0, 255);
       } else {
         fill(255, 0, 0);
       }
@@ -439,7 +445,7 @@ class Enemy {
     for(int i = 0; i < ballCount; i++) {
       easyEnemyHp[i] = 5;
     }
-    bigEnemyHp = 5;
+    bigEnemyHp = 150;
     bossX = 200;
     bossY = 150;
   }
@@ -462,7 +468,10 @@ class Enemy {
     }
   }
   
+  
   int[] k = new int[ballCount];
+  float[] dpX = new float[ballCount];//deathPositionX
+  float[] dpY = new float[ballCount];
   int enemyDamege(float bX[], float bY[], int c[]) {
     int i, j;
     for(i = 0; i < ballCount; i++) {
@@ -472,6 +481,8 @@ class Enemy {
           bX[j] = -15;
           bY[j] = -15;
           if(easyEnemyHp[i] <= 0) {
+            dpX[i] = zakoX[i];
+            dpY[i] = zakoY[i];
             zakoX[i] = -100;
             zakoY[i] = -5;
             k[i] = 1;
@@ -479,14 +490,13 @@ class Enemy {
         }
       }
     }
-    println("a");
     for(i = 0; i < ballCount; i++) {
       if(k[i] == 1) {
         k[i] = 2;
         return i;
       }
     }
-    
+   
     return -1;
   }
   
@@ -513,6 +523,7 @@ class Enemy {
   boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
     int i;
     if(bigEnemyHp < 0) {
+      t = 3;
       return false;
     }
     for(i = 0; i < bX.length; i++) {
@@ -547,11 +558,13 @@ class Title{
     fill(100);
     textSize(80);
     text("Cyber Space I", 30, 250);
+    fill(255, 0, 0);
+    textSize(79);
+    text("Cyber Space I", 30, 250);
     fill(0);
     rect(215, 490, 110, 50);
     textSize(50);
     fill(255);
-    stroke(0);
     text("start", 215, 530);
   }
   
@@ -582,7 +595,8 @@ Enemy e;
 
 int t = 0;
 int timer = 0;
-int de = -1;
+int de1 = -1;
+int de2 = -1;
 
 void setup() {
   size(600,800);
@@ -596,7 +610,6 @@ void setup() {
   e = new Enemy();  
   
   p1.hp(5);
-  //item.makeItems();
   b.MyMachineStart();
   b.enemyBulletSet();
   e.setEnemy();
@@ -607,52 +620,46 @@ void setup() {
 void draw() {
   bg = loadImage("haikei.jpeg");
   image(bg, 0, 0, 600, 800);
-  
   if(t == 0){
     title.display();
     title.judge();
     t = title.getTitle();
   }else if(t == 1){
-    if(timer > 1*30) { //3秒後スタート
+    if(timer > 1*30) { //1秒後スタート
       p1.display();
       item.setItem(p1.px, p1.py);
-
+    
       if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c, b.BBX, b.BBY) == false){ //当たったらhp減少 falseでゲームオーバー
         t = 2;
         return;
       }
-      item.drawItem();
       b.MyMachineBullet();
+    
     
       if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
         e.easyEnemy();
       }
-     
-      de = e.enemyDamege(b.ballx, b.bally, b.c);
- 
-      /*
-      if(de != -1) {
-        item.makeItems(e.zakoX, e.zakoY, de);
+      
+      de1 = e.enemyDamege(b.ballx, b.bally, b.c);
+      if(de1 != -1 || de2 != -1) {
+        if(de1 != -1) {
+          de2 = de1;
+          item.makeItems(e.dpX, e.dpY, de2);
+        }
+        item.drawItem();
       }
-      */
       b.enemyBullet(e.zakoX,e.zakoY);
     
-      if(timer > 1*30) {//ボスが何秒後に出現するか
+      if(timer > 30*30) {//ボスが何秒後に出現するか
         if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
           b.bigEnemyBullet(e.bossX, e.bossY);
           e.bigEnemy();
-        } else {
-          t = 3;
         }
       }
     }
     timer++;
-  }else if(t == 2 || t == 3){
+  }else if(t == 2){
     fill(100);
-    stroke(0);
-    if(t == 3) {
-      text("cleared the game", 100, 100);
-    }
     textSize(80);
     text("score:" + item.score, 150, 250);
     fill(0);
@@ -673,7 +680,33 @@ void draw() {
         timer = 0;
       }
     }
-  } 
+  }else{
+    fill(255, 0, 30);
+    textSize(100);
+    text("Mission", 100, 120);
+    text("Complete", 80, 220);
+    fill(0, 255, 125);
+    textSize(40);
+    text("score:" + item.score, 200, 400);
+    fill(0);
+    rect(210, 490, 110, 50);
+    textSize(50);
+    fill(255);
+    text("exit!", 210, 530);
+        
+    if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
+      if(mousePressed == true){
+        t = 0;
+        title.setTitle(t);
+        p1.hp(5);
+        b.MyMachineStart();
+        b.enemyBulletSet();
+        e.setEnemy();
+        b.bigEnemySet();
+        timer = 0;
+      }
+    }
+  }
 }
 
 void mousePressed() {
@@ -685,7 +718,17 @@ void keyPressed() {
     b.delete();
   }
   
+  if(key == 'a' || key == 'A'){
+    b.ClickBullet();
+  }
+  
   if(key == 'r' || key == 'R') {//リスタート
-    
+    p1.hp(5);
+    b.MyMachineStart();
+    b.enemyBulletSet();
+    e.setEnemy();
+    b.bigEnemySet();
+    timer = 0;
+    t = 0;
   }
 }
