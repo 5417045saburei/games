@@ -89,7 +89,6 @@ class Items{
   float[] items_random = new float[10];
   int[] items = new int[10];
   int[] get = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  int[] bullet_ver = {1, 0, 0};
   int score = 0;
   int power = 0;
   int p = 1;
@@ -109,12 +108,10 @@ class Items{
       }
       items_random[i] = (float)random(0.0, 11.0);
       if(items_random[i] < 0.3){
-        items[i] = 5;
-      }else if(0.3 <= items_random[i] && items_random[i] < 0.6){
         items[i] = 4;
-      }else if(0.6 <= items_random[i] && items_random[i] < 0.9){
+      }else if(0.3 <= items_random[i] && items_random[i] < 0.6){
         items[i] = 3;
-      }else if(0.9 <= items_random[i] && items_random[i] < 8.0){
+      }else if(0.6 <= items_random[i] && items_random[i] < 4.0){
         items[i] = 2;
       }else{
         items[i] = 1;
@@ -132,13 +129,11 @@ class Items{
     for(int i = 0; i < 10; i++){
       if(get[i] == 0){
         if(items[i] == 1){
-          fill(255, 0, 0);
-        }else if(items[i] == 2){
-          fill(0, 0, 255);
-        }else if(items[i] == 3){
-          fill(0, 255, 255);
-        }else if(items[i] == 4){
           fill(255, 255, 0);
+        }else if(items[i] == 2){
+          fill(0, 255, 255);
+        }else if(items[i] == 3){
+          fill(0, 255, 0);
         }else{
           fill(255, 0, 255);
         }
@@ -156,17 +151,9 @@ class Items{
       
         if((p_x <= x[i] + 20.0 && x[i] <= p_x + 40.0) && (p_y <= y[i] + 20.0 && y[i] <= p_y + 40.0)){
           if(items[i] == 3){ 
-            bullet_ver[0] = 1;
-            bullet_ver[1] = 0;
-            bullet_ver[2] = 0;
+            b.delete();
           }else if(items[i] == 4){
-            bullet_ver[0] = 0;
-            bullet_ver[1] = 1;
-            bullet_ver[2] = 0;
-          }else if(items[i] == 5){
-            bullet_ver[0] = 0;
-            bullet_ver[1] = 0;
-            bullet_ver[2] = 1;
+            p1.hp = 5;
           }
       
           if(items[i] == 1){
@@ -625,9 +612,9 @@ void setup() {
 }
 
 void draw() {
-  //bg = loadImage("haikei.jpeg");
-  //image(bg, 0, 0, 600, 800);
-  background(255);
+  bg = loadImage("haikei.jpeg");
+  image(bg, 0, 0, 600, 800);
+  
   if(t == 0){
     title.display();
     title.judge();
@@ -689,6 +676,7 @@ void draw() {
       }
     }
   }else{
+    item.score += 100;
     fill(255, 0, 30);
     textSize(100);
     text("Mission", 100, 120);
