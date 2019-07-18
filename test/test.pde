@@ -158,7 +158,7 @@ class Items{
       
           if(items[i] == 1){
             power++;
-            if(power == 10) {
+            if(power == 5) {
               p++;
               power = 0;
             }
