@@ -391,7 +391,7 @@ class bullet {
     
   }
   
-  void delete() {
+  void delete() { //弾を全て消す
     int i, j;
     for(i = 0; i < enemyCount; i++) {
       for(j = 0; j < BulletTotal; j++) {
@@ -571,7 +571,7 @@ void draw() {
     item.drawItem();
     b.MyMachineBullet();
     
-    /*
+    
     if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
       e.easyEnemy();
     }
@@ -581,9 +581,9 @@ void draw() {
       item.makeItems(e.zakoX, e.zakoY, de);
     }
     b.enemyBullet(e.zakoX,e.zakoY);
-    */
     
-    if(timer > 30*5) {
+    
+    if(timer > 30*30) {//ボスが何秒後に出現するか
       if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
         b.bigEnemyBullet(e.bossX, e.bossY);
         e.bigEnemy();
