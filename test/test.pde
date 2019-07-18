@@ -13,6 +13,10 @@ class player{
     line(px, py-15, px+15, py+15);
     line(px, py+15, px-15, py-15);
     line(px, py+15, px+15, py-15);
+    
+    fill(255);
+    textSize(30);
+    text("hp:" + hp, 470, 70);
   }
   
     int avo = 0; //一つの弾で多段攻撃を回避
@@ -93,11 +97,16 @@ class Items{
   void setItem(int x0, int y0){
     p_x = x0;
     p_y = y0;
+    fill(255);
+    textSize(30);
+    text("score:" + score, 440, 30);
   }
 
-  void makeItems(int zX[], int zY[], int de){
+  void makeItems(float zX[], float zY[], int de){
     size(600, 800);
     for(int i = 0; i < 10; i++){
+      for(int j = 0; j < 10; j++) {
+      }
       items_random[i] = (float)random(0.0, 11.0);
       if(items_random[i] < 0.3){
         items[i] = 5;
@@ -113,16 +122,13 @@ class Items{
     
       x[i] = zX[de];
       y[i] = zY[de];
+      println(zX[de]);
       xSpeed[i] = random(-5.0, 5.0);
       ySpeed[i] = random(-5.0, -0.1);
     }
   }
 
   void drawItem(){
-    fill(255);
-    textSize(30);
-    text("score:" + score, 440, 30);
-    text("hp:" + p1.hp, 470, 70);
     for(int i = 0; i < 10; i++){
       if(get[i] == 0){
         if(items[i] == 1){
@@ -165,7 +171,7 @@ class Items{
       
           if(items[i] == 1){
             power++;
-            if(power == 10){
+            if(power == 10) {
               p++;
               power = 0;
             }
@@ -272,7 +278,7 @@ class bullet {
     
   }
     
-  void enemyBullet(int eX[], int eY[]){
+  void enemyBullet(float eX[], float eY[]){
     int i,j;
     
     for(i = 0; i < enemyCount; i++) {
@@ -366,7 +372,7 @@ class bullet {
     }
   }
   
-  void bigEnemyBullet(int boX,int boY) {
+  void bigEnemyBullet(float boX,float boY) {
     int i;
    
     BBTR++;
@@ -422,25 +428,25 @@ class bullet {
 
 class Enemy {
   int ballCount = 10;
-  int[] zakoX = new int[ballCount];
-  int[] zakoY = new int[ballCount];
+  float[] zakoX = new float[ballCount];
+  float[] zakoY = new float[ballCount];
   int zakoR = 30;
-  int[] stepX = new int[ballCount];
-  int[] stepY = new int[ballCount];
-  int bossX;
-  int bossY;
+  float[] stepX = new float[ballCount];
+  float[] stepY = new float[ballCount];
+  float bossX;
+  float bossY;
   int bossR = 160;
-  int bossStepX = 2;
-  int bossStepY = 1;
+  float bossStepX = 2;
+  float bossStepY = 1;
   int[] easyEnemyHp = new int[ballCount];
   int bigEnemyHp;
   
   void setEnemy() {
     for(int i = 0; i < ballCount; i++) {
-      zakoX[i] = int(random(15, 380));
-      zakoY[i] = int(random(20, 31));
-      stepX[i] = int(random(-5, 5));
-      stepY[i] = int(random(0, 3));
+      zakoX[i] = random(15, 380);
+      zakoY[i] = random(20, 31);
+      stepX[i] = random(-5, 5);
+      stepY[i] = random(0, 3);
     }
     
     for(int i = 0; i < ballCount; i++) {
@@ -470,6 +476,9 @@ class Enemy {
   }
   
   
+  int[] k = new int[ballCount];
+  float[] dpX = new float[ballCount];//deathPositionX
+  float[] dpY = new float[ballCount];
   int enemyDamege(float bX[], float bY[], int c[]) {
     int i, j;
     for(i = 0; i < ballCount; i++) {
@@ -479,11 +488,19 @@ class Enemy {
           bX[j] = -15;
           bY[j] = -15;
           if(easyEnemyHp[i] <= 0) {
+            dpX[i] = zakoX[i];
+            dpY[i] = zakoY[i];
             zakoX[i] = -100;
             zakoY[i] = -5;
-            return i;
+            k[i] = 1;
           }
         }
+      }
+    }
+    for(i = 0; i < ballCount; i++) {
+      if(k[i] == 1) {
+        k[i] = 2;
+        return i;
       }
     }
    
@@ -520,7 +537,7 @@ class Enemy {
       if(((bossX-bX[i])*(bossX-bX[i])) + ((bossY-bY[i])*(bossY-bY[i])) <= (bossR/2)*(bossR/2) && c[i] == 1) {
         bX[i] = -15;
         bY[i] = -15;
-        bigEnemyHp -= item.p;
+        bigEnemyHp--;
       }
     }
     return true;
@@ -568,6 +585,7 @@ class Title{
   
   void setTitle(int t0){
     ti = t0;
+    mousePressed = false;
   }
   
   int getTitle(){
@@ -584,6 +602,8 @@ Enemy e;
 
 int t = 0;
 int timer = 0;
+int de1 = -1;
+int de2 = -1;
 
 void setup() {
   size(600,800);
@@ -597,23 +617,23 @@ void setup() {
   e = new Enemy();  
   
   p1.hp(5);
-  //item.makeItems();
   b.MyMachineStart();
   b.enemyBulletSet();
   e.setEnemy();
   b.bigEnemySet();
+  title.setTitle(t);
 }
 
 void draw() {
-  bg = loadImage("haikei.jpeg");
-  image(bg, 0, 0, 600, 800);
+  //bg = loadImage("haikei.jpeg");
+  //image(bg, 0, 0, 600, 800);
+  background(255);
   if(t == 0){
     title.display();
-    title.setTitle(t);
     title.judge();
     t = title.getTitle();
   }else if(t == 1){
-    if(timer > 3*30) { //3秒後スタート
+    if(timer > 1*30) { //1秒後スタート
       p1.display();
       item.setItem(p1.px, p1.py);
     
@@ -621,20 +641,22 @@ void draw() {
         t = 2;
         return;
       }
-      item.drawItem();
       b.MyMachineBullet();
     
     
       if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
         e.easyEnemy();
       }
-      int de = -1; 
-      e.enemyDamege(b.ballx, b.bally, b.c);
-      if(de != -1) {
-        item.makeItems(e.zakoX, e.zakoY, de);
+      
+      de1 = e.enemyDamege(b.ballx, b.bally, b.c);
+      if(de1 != -1 || de2 != -1) {
+        if(de1 != -1) {
+          de2 = de1;
+          item.makeItems(e.dpX, e.dpY, de2);
+        }
+        item.drawItem();
       }
       b.enemyBullet(e.zakoX,e.zakoY);
-    
     
       if(timer > 30*30) {//ボスが何秒後に出現するか
         if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
@@ -656,7 +678,14 @@ void draw() {
         
     if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
       if(mousePressed == true){
-        exit();
+        t = 0;
+        title.setTitle(t);
+        p1.hp(5);
+        b.MyMachineStart();
+        b.enemyBulletSet();
+        e.setEnemy();
+        b.bigEnemySet();
+        timer = 0;
       }
     }
   }else{
@@ -675,7 +704,14 @@ void draw() {
         
     if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
       if(mousePressed == true){
-        exit();
+        t = 0;
+        title.setTitle(t);
+        p1.hp(5);
+        b.MyMachineStart();
+        b.enemyBulletSet();
+        e.setEnemy();
+        b.bigEnemySet();
+        timer = 0;
       }
     }
   }
