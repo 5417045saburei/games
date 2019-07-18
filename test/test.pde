@@ -511,7 +511,10 @@ class Enemy {
     line(bossX + 10, bossY, bossX + 50, bossY - 40);
     line(bossX, bossY + 10, bossX - 40, bossY + 50);
     line(bossX, bossY + 10, bossX + 40, bossY + 50);
-    
+    fill(255);
+    ellipse(bossX, bossY, 50, 50);
+    fill(0);
+    ellipse(bossX, bossY, 25, 30);
   }
   
   boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
