@@ -200,7 +200,7 @@ class bullet {
   void MyMachineBullet() {  
     for(int i = 0; i < clickCount; i++){
       if(c[i] == 1) {
-        fill(0, 0, 255);
+        fill(100, 10, 200);
       } else {
         fill(255, 0, 0);
       }
@@ -439,7 +439,7 @@ class Enemy {
     for(int i = 0; i < ballCount; i++) {
       easyEnemyHp[i] = 5;
     }
-    bigEnemyHp = 150;
+    bigEnemyHp = 5;
     bossX = 200;
     bossY = 150;
   }
@@ -462,7 +462,7 @@ class Enemy {
     }
   }
   
-  
+  int[] k = new int[ballCount];
   int enemyDamege(float bX[], float bY[], int c[]) {
     int i, j;
     for(i = 0; i < ballCount; i++) {
@@ -474,12 +474,19 @@ class Enemy {
           if(easyEnemyHp[i] <= 0) {
             zakoX[i] = -100;
             zakoY[i] = -5;
-            return i;
+            k[i] = 1;
           }
         }
       }
     }
-   
+    println("a");
+    for(i = 0; i < ballCount; i++) {
+      if(k[i] == 1) {
+        k[i] = 2;
+        return i;
+      }
+    }
+    
     return -1;
   }
   
@@ -533,11 +540,45 @@ class Enemy {
   }
 }
 
+class Title{
+  private int ti;
+  
+  void display(){
+    fill(100);
+    textSize(80);
+    text("Cyber Space I", 30, 250);
+    fill(0);
+    rect(215, 490, 110, 50);
+    textSize(50);
+    fill(255);
+    text("start", 215, 530);
+  }
+  
+  void judge(){
+    if((215 < mouseX && mouseX < 325) && (490 < mouseY && mouseY < 540)){
+      if(mousePressed == true){
+        ti = 1;
+      }
+    }
+  }
+  
+  void setTitle(int t0){
+    ti = t0;
+  }
+  
+  int getTitle(){
+    return ti;
+  }
+}
+
+PImage bg;
+Title title;
 Items item;
 player p1;
 bullet b;
 Enemy e;
 
+int t = 0;
 int timer = 0;
 
 void setup() {
@@ -545,6 +586,7 @@ void setup() {
   noStroke();
   frameRate(30);
   
+  title = new Title();
   p1 = new player();
   item = new Items();
   b = new bullet();
@@ -558,40 +600,96 @@ void setup() {
   b.bigEnemySet();
 }
 
+int de = -1;
 void draw() {
-  if(timer > 3*30) { //3秒後スタート
-    background(255);
-    p1.display();
-    item.setItem(p1.px, p1.py);
+  bg = loadImage("haikei.jpeg");
+  image(bg, 0, 0, 600, 800);
+  
+  if(t == 0){
+    title.display();
+    title.setTitle(t);
+    title.judge();
+    t = title.getTitle();
+  }else if(t == 1){
+    if(timer > 1*30) { //3秒後スタート
+      p1.display();
+      item.setItem(p1.px, p1.py);
+
+      if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c, b.BBX, b.BBY) == false){ //当たったらhp減少 falseでゲームオーバー
+        t = 2;
+        return;
+      }
+      item.drawItem();
+      b.MyMachineBullet();
     
-    if(p1.judge(b.eBulletX, b.eBulletY, b.ballx, b.bally, b.c, b.BBX, b.BBY) == false){ //当たったらhp減少 falseでゲームオーバー
-      background(255);
-      return;
+      if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
+        e.easyEnemy();
+      }
+     
+      de = e.enemyDamege(b.ballx, b.bally, b.c);
+ 
+      /*
+      if(de != -1) {
+        item.makeItems(e.zakoX, e.zakoY, de);
+      }
+      */
+      b.enemyBullet(e.zakoX,e.zakoY);
+    
+      if(timer > 1*30) {//ボスが何秒後に出現するか
+        if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
+          b.bigEnemyBullet(e.bossX, e.bossY);
+          e.bigEnemy();
+        } else {
+          t = 3;
+        }
+      }
     }
-    item.drawItem();
-    b.MyMachineBullet();
-    
-    
-    if(e.easyEnemyIn() == true) {//画面内に全てのザコ敵が消えたら出力しない
-      e.easyEnemy();
+    timer++;
+  }else if(t == 2){
+    fill(100);
+    textSize(80);
+    text("score:" + item.score, 150, 250);
+    fill(0);
+    rect(210, 490, 110, 50);
+    textSize(50);
+    fill(255);
+    text("exit!", 210, 530);
+        
+    if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
+      if(mousePressed == true){
+        t = 0;
+        p1.hp(5);
+        b.MyMachineStart();
+        b.enemyBulletSet();
+        e.setEnemy();
+        b.bigEnemySet();
+        timer = 0;
+      }
     }
-    int de = -1; 
-    de = e.enemyDamege(b.ballx, b.bally, b.c);
-    println(de);
-    if(de != -1) {
-      item.makeItems(e.zakoX, e.zakoY, de);
-    }
-    b.enemyBullet(e.zakoX,e.zakoY);
-    
-    
-    if(timer > 30*30) {//ボスが何秒後に出現するか
-      if(e.bigEnemyDamege(b.ballx, b.bally, b.c) == true) {
-        b.bigEnemyBullet(e.bossX, e.bossY);
-        e.bigEnemy();
+  } else {
+    fill(100);
+    text("cleared the game", 100, 100);
+    textSize(80);
+    text("score:" + item.score, 150, 250);
+    fill(0);
+    rect(210, 490, 110, 50);
+    textSize(50);
+    fill(255);
+    text("exit!", 210, 530);
+        
+    if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
+      if(mousePressed == true){
+        title.setTitle(0);
+        t = 0;
+        p1.hp(5);
+        b.MyMachineStart();
+        b.enemyBulletSet();
+        e.setEnemy();
+        b.bigEnemySet();
+        timer = 0;
       }
     }
   }
-  timer++;
 }
 
 void mousePressed() {
@@ -604,11 +702,6 @@ void keyPressed() {
   }
   
   if(key == 'r' || key == 'R') {//リスタート
-    p1.hp(5);
-    b.MyMachineStart();
-    b.enemyBulletSet();
-    e.setEnemy();
-    b.bigEnemySet();
-    timer = 0;
+    
   }
 }
