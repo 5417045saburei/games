@@ -15,8 +15,8 @@ class player{
     line(px, py+15, px+15, py-15);
   }
   
-  int avo = 0; //一つの弾で多段攻撃を回避
-  boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[], float BBX[], float BBY[]) {
+    int avo = 0; //一つの弾で多段攻撃を回避
+    boolean judge(float bulletX[][], float bulletY[][], float myBallX[], float myBallY[], int c[], float BBX[], float BBY[]) {
     int size = 10; //弾の大きさ
     int i, j;
     
@@ -508,6 +508,7 @@ class Enemy {
   boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
     int i;
     if(bigEnemyHp < 0) {
+      t = 3;
       return false;
     }
     for(i = 0; i < bX.length; i++) {
@@ -541,6 +542,9 @@ class Title{
   void display(){
     fill(100);
     textSize(80);
+    text("Cyber Space I", 30, 250);
+    fill(255, 0, 0);
+    textSize(79);
     text("Cyber Space I", 30, 250);
     fill(0);
     rect(215, 490, 110, 50);
@@ -639,6 +643,25 @@ void draw() {
     fill(100);
     textSize(80);
     text("score:" + item.score, 150, 250);
+    fill(0);
+    rect(210, 490, 110, 50);
+    textSize(50);
+    fill(255);
+    text("exit!", 210, 530);
+        
+    if((210 < mouseX && mouseX < 320) && (490 < mouseY && mouseY < 540)){
+      if(mousePressed == true){
+        exit();
+      }
+    }
+  }else{
+    fill(255, 0, 30);
+    textSize(100);
+    text("Mission", 100, 120);
+    text("Complete", 80, 220);
+    fill(0, 255, 125);
+    textSize(40);
+    text("score:" + item.score, 200, 400);
     fill(0);
     rect(210, 490, 110, 50);
     textSize(50);
