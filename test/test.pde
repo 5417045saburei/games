@@ -501,6 +501,7 @@ class Enemy {
   float bossStepY = 1.5;
   int[] easyEnemyHp = new int[ballCount];
   int bigEnemyHp;
+  int bigEnemyHpFull = 100;
   int[] k;
   float[] dpX;//deathPositionX
   float[] dpY;
@@ -524,7 +525,7 @@ class Enemy {
     k = new int[ballCount];
     dpX = new float[ballCount];
     dpY = new float[ballCount];
-    rd = int(random(0, 3));
+    rd = int(random(0, 5));
   }
     
   
@@ -596,6 +597,20 @@ class Enemy {
     ellipse(bossX, bossY, 50, 50);
     fill(0);
     ellipse(bossX, bossY, 25, 30);
+    if(bigEnemyHp < bigEnemyHpFull/2) {
+      fill(50);
+      noStroke();
+      ellipse(bossX, bossY, bossR, bossR);
+      stroke(10, 255, 10);
+      line(bossX - 10, bossY, bossX - 50, bossY - 40);
+      line(bossX + 10, bossY, bossX + 50, bossY - 40);
+      line(bossX, bossY + 10, bossX - 40, bossY + 50);
+      line(bossX, bossY + 10, bossX + 40, bossY + 50);
+      fill(100);
+      ellipse(bossX, bossY, 50, 50);
+      fill(0);
+      ellipse(bossX, bossY, 25, 30);
+    }
   }
   
   boolean bigEnemyDamege(float bX[], float bY[], int c[]) {
